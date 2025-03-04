@@ -1,0 +1,128 @@
+---
+title: "Data_SetUp"
+output: html_document
+date: "2025-03-04"
+---
+
+We begin with the first part of our project, exploring the many features involved in our dataset. In particular, we will probe into the specifics, diving into features for our different trials, sessions, and mice. This will include session-specific data structures, neural activities occurring in each trial, changes across trials, and the similarities and differences between sessions and between mice.
+
+After this analysis, we should have a better understanding of our dataset and its several features. Thus, our evolved understanding will allow for a more representative predictive model.
+
+```{r}
+# """Bringing all of our data together"""
+
+
+session=list()
+for(i in 1:18){
+  session[[i]]=readRDS(paste('./Data/session',i,'.rds',sep=''))
+  
+   print(session[[i]]$mouse_name)
+   print(session[[i]]$date_exp)
+}
+```
+
+We can visualize some of our data using the table produced below. In this table, we will extract session information -- this will include the date of the experiment, the number of brain areas that were involved, the number of neurons that were activated, the number of trials, and the success rate; All of this data will be collected for each mouse.
+
+```{r}
+library(tidyverse)
+library(knitr)
+library(xtable)
+library(kableExtra)
+
+n.session = length(session)
+meta <- tibble(
+  mouse_name = rep('name',n.session),
+  date_exp =rep('dt',n.session),
+  n_brain_area = rep(0,n.session),
+  n_neurons = rep(0,n.session),
+  n_trials = rep(0,n.session),
+  success_rate = rep(0,n.session)
+)
+
+for(i in 1:n.session){
+  tmp = session[[i]];
+  meta[i,1]=tmp$mouse_name;
+  meta[i,2]=tmp$date_exp;
+  meta[i,3]=length(unique(tmp$brain_area));
+  meta[i,4]=dim(tmp$spks[[1]])[1];
+  meta[i,5]=length(tmp$feedback_type);
+  meta[i,6]=mean(tmp$feedback_type+1)/2;
+  }
+
+
+meta %>%
+    kbl(digits=2, col.names = c("Mice", "Experiment Date", "Number of Brain Areas", "Number of Neurons", "Number of Trials", "Success Rate")) %>%
+    kable_classic(full_width=F, html_font="Cambria")
+```
+As we can see from the table above, the data per mouse exhibits considerable heterogeneity. 
+
+For instance, while Hench and Forssmann were both subjected to four sessions of experimentation, Cori only underwent three, while Lederberg underwent seven sessions. This inequity in experimentation may impact the substance of our data by making our information more representative of our heavily-tested specimen, Lederberg.
+
+
+
+
+Here, we reflect on the differences within our study.
+
+```{r}
+
+
+contrasts <- tibble(
+  mouse_name = rep('name',n.session),
+  date_exp = rep('df',n.session),
+  n_brain_area = rep(0,n.session),
+  n_neurons = rep(0,n.session),
+  n_trials = rep(0,n.session),
+  success_rate = rep(0,n.session)
+)
+View(meta)
+
+amount=0
+
+
+for(i in 1:n.session){
+  tmp = session[[i]];
+  contrasts[i,1]=tmp$mouse_name;
+  contrasts[i,2]=tmp$date_exp
+  contrasts[i,3]=length(unique(tmp$brain_area));
+  contrasts[i,4]=dim(tmp$spks[[1]])[1];
+  contrasts[i,5]=length(tmp$feedback_type);
+  contrasts[i,6]=mean(tmp$feedback_type+1)/2;
+  }
+View(contrasts)
+
+#A function to get the date_exp
+alter_Date <- function(data, mName, func){
+  theResult = func((data %>% filter(mouse_name == mName))$date_exp)
+  return (theResult)
+}
+#A function to get n_trials
+alter_nTrials <- function(data, mName, func){
+  theResult = func((data %>% filter(mouse_name == mName))$n_trials)
+  return (theResult)
+}
+
+
+#Find the number of sessions for each mouse
+cor.exps <- alter_Date(contrasts, "Cori", length); cor.exps
+for.exps <- alter_Date(contrasts, "Forssmann", length); for.exps
+hen.exps <- alter_Date(contrasts, "Hench", length); hen.exps
+led.exps <- alter_Date(contrasts, "Lederberg", length); led.exps
+
+#Find the number of trials for each mouse
+cor.trials <- alter_nTrials(contrasts, "Cori", sum); cor.trials
+for.trials <- alter_nTrials(contrasts, "Forssmann", sum); for.trials
+hen.trials <- alter_nTrials(contrasts, "Hench", sum); hen.trials
+led.trials <- alter_nTrials(contrasts, "Lederberg", sum); led.trials
+
+#First, last, and mean data points, for specified data
+
+
+```
+
+
+
+
+
+#Sources
+Source 1: For kableExtra Table, on Line 26 --> https://haozhu233.github.io/kableExtra/awesome_table_in_html.html
+

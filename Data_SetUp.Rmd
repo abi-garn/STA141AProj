@@ -78,7 +78,6 @@ View(meta)
 
 amount=0
 
-
 for(i in 1:n.session){
   tmp = session[[i]];
   contrasts[i,1]=tmp$mouse_name;
@@ -100,24 +99,367 @@ alter_nTrials <- function(data, mName, func){
   theResult = func((data %>% filter(mouse_name == mName))$n_trials)
   return (theResult)
 }
+#A function to get success_rate
+alter_nTrials <- function(data, mName, func){
+  theResult = func((data %>% filter(mouse_name == mName))$n_trials)
+  return (theResult)
+}
+```
+
+```{r}
+get_Data <- function(data, mName, var, minMax){
+  if (var=="success_rate"){
+    answer = ((data %>% filter(mouse_name == mName))$success_rate)
+  }else if (var=="n_brain_area"){
+    answer = ((data %>% filter(mouse_name == mName))$n_brain_area)
+  } else {
+    answer = ((data %>% filter(mouse_name == mName))$n_neurons)
+  }
+  if (minMax == 0){
+    answer = answer[1]
+  } else {
+    dataLen = length(data)
+    answer = tail(answer, 1)
+  }
+  answer = signif(answer, 2)
+  return (answer)
+}
+
+getMeans <- function(mName, var){
+  sum = 0
+  count = 0
+  for (i in 1:n.session){
+    tmp = session[[i]];
+    if (tmp$mouse_name == mName){
+      if (var == "success_rate"){
+         val = mean(tmp$feedback_type+1)/2
+         sum = sum+val
+      } else if (var == "n_brain_area"){
+         val = length(unique(tmp$brain_area))
+         sum = sum+val
+      }else {
+         val = dim(tmp$spks[[1]])[1]
+         sum = sum+val
+      }
+      count = count+1
+    }
+  }
+  meanSuccess = (sum/count)
+  if (var == "n_brain_area"){
+    meanSuccess = signif((sum/count),1)
+  }
+  return (meanSuccess)
+}
+
+```
 
 
+```{r}
 #Find the number of sessions for each mouse
-cor.exps <- alter_Date(contrasts, "Cori", length); cor.exps
-for.exps <- alter_Date(contrasts, "Forssmann", length); for.exps
-hen.exps <- alter_Date(contrasts, "Hench", length); hen.exps
-led.exps <- alter_Date(contrasts, "Lederberg", length); led.exps
+cor.exps = alter_Date(contrasts, "Cori", length);
+for.exps = alter_Date(contrasts, "Forssmann", length); 
+hen.exps = alter_Date(contrasts, "Hench", length); 
+
 
 #Find the number of trials for each mouse
-cor.trials <- alter_nTrials(contrasts, "Cori", sum); cor.trials
-for.trials <- alter_nTrials(contrasts, "Forssmann", sum); for.trials
-hen.trials <- alter_nTrials(contrasts, "Hench", sum); hen.trials
-led.trials <- alter_nTrials(contrasts, "Lederberg", sum); led.trials
+cor.trials = alter_nTrials(contrasts, "Cori", sum); 
+for.trials = alter_nTrials(contrasts, "Forssmann", sum); 
+hen.trials = alter_nTrials(contrasts, "Hench", sum);
+
 
 #First, last, and mean data points, for specified data
 
+#Cori 
+cor.success_rate.mean = getMeans("Cori", "success_rate")
+cor.success_rate.first = get_Data(contrasts, "Cori", "success_rate", 0)
+cor.success_rate.last = get_Data(contrasts, "Cori", "success_rate", 1)
+
+
+cor.n_brain_area.mean = getMeans("Cori", "n_brain_area")
+cor.n_brain_area.first = get_Data(contrasts, "Cori", "n_brain_area", 0)
+cor.n_brain_area.last = get_Data(contrasts, "Cori", "n_brain_area", 1)
+
+
+cor.n_neurons.mean = getMeans("Cori", "n_neurons")
+cor.n_neurons.first = get_Data(contrasts, "Cori", "n_neurons", 0)
+cor.n_neurons.last = get_Data(contrasts, "Cori", "n_neurons", 1)
+
+
+
+#Forssmann
+for.success_rate.mean = getMeans("Forssmann", "success_rate")
+for.success_rate.first = get_Data(contrasts, "Forssmann", "success_rate", 0)
+for.success_rate.last = get_Data(contrasts, "Forssmann", "success_rate", 1)
+
+
+for.n_brain_area.mean = getMeans("Forssmann", "n_brain_area")
+for.n_brain_area.first = get_Data(contrasts, "Forssmann", "n_brain_area", 0)
+for.n_brain_area.last = get_Data(contrasts, "Forssmann", "n_brain_area", 1)
+
+
+for.n_neurons.mean = getMeans("Forssmann", "n_neurons")
+for.n_neurons.first = get_Data(contrasts, "Forssmann", "n_neurons", 0)
+for.n_neurons.last = get_Data(contrasts, "Forssmann", "n_neurons", 1)
+
+
+
+#Hench
+hen.success_rate.mean = getMeans("Hench", "success_rate")
+hen.success_rate.first = get_Data(contrasts, "Hench", "success_rate", 0)
+hen.success_rate.last = get_Data(contrasts, "Hench", "success_rate", 1)
+
+
+hen.n_brain_area.mean = getMeans("Hench", "n_brain_area")
+hen.n_brain_area.first = get_Data(contrasts, "Hench", "n_brain_area", 0)
+hen.n_brain_area.last = get_Data(contrasts, "Hench", "n_brain_area", 1)
+
+
+hen.n_neurons.mean = getMeans("Hench", "n_neurons")
+hen.n_neurons.first = get_Data(contrasts, "Hench", "n_neurons", 0)
+hen.n_neurons.last = get_Data(contrasts, "Hench", "n_neurons", 1)
+
+
+
+#Lederberg
+led.success_rate.mean = getMeans("Lederberg", "success_rate")
+led.success_rate.first = get_Data(contrasts, "Lederberg", "success_rate", 0)
+led.success_rate.last = get_Data(contrasts, "Lederberg", "success_rate", 1)
+
+
+led.n_brain_area.mean = getMeans("Lederberg", "n_brain_area")
+led.n_brain_area.first = get_Data(contrasts, "Lederberg", "n_brain_area", 0)
+led.n_brain_area.last = get_Data(contrasts, "Lederberg", "n_brain_area", 1)
+
+
+led.n_neurons.mean = getMeans("Lederberg", "n_neurons")
+led.n_neurons.first = get_Data(contrasts, "Lederberg", "n_neurons", 0)
+led.n_neurons.last = get_Data(contrasts, "Lederberg", "n_neurons", 1)
 
 ```
+
+
+```{r}
+#######Ongoing
+#Table for the first, last, and mean success rate
+n.session = length(session)
+success_rate.Data <- tibble(
+  mouse_name = rep(0,4),
+  min = rep(0,4),
+  max = rep(0,4),
+  mean = rep(0,4),
+)
+
+
+for(i in range(4)){
+  success_rate.Data$mouse_name = c("Cori", "Forssmann", "Hench", "Lederberg")
+  success_rate.Data$min = c(cor.success_rate.first, for.success_rate.first, hen.success_rate.first, led.success_rate.first)
+  success_rate.Data$max = c(cor.success_rate.last, for.success_rate.last, hen.success_rate.last, led.success_rate.last)
+  success_rate.Data$mean = c(cor.success_rate.mean, for.success_rate.mean, hen.success_rate.mean, led.success_rate.mean)
+}
+success_rate.Data %>%
+    kbl(digits=2, col.names = c("Mice", "First Success Rate", "Last Success Rate", "Mean Success Rate")) %>%
+    kable_classic(full_width=F, html_font="Cambria")
+
+#Table for the first, last, and mean number of brain areas
+n_brain_area.Data <- tibble(
+  mouse_name = rep(0,4),
+  min = rep(0,4),
+  max = rep(0,4),
+  mean = rep(0,4),
+)
+
+
+for(i in range(4)){
+  n_brain_area.Data$mouse_name = c("Cori", "Forssmann", "Hench", "Lederberg")
+  n_brain_area.Data$min = c(cor.n_brain_area.first, for.n_brain_area.first, hen.n_brain_area.first, led.n_brain_area.first)
+  n_brain_area.Data$max = c(cor.n_brain_area.last, for.n_brain_area.last, hen.n_brain_area.last, led.n_brain_area.last)
+  n_brain_area.Data$mean = c(cor.n_brain_area.mean, for.n_brain_area.mean, hen.n_brain_area.mean, led.n_brain_area.mean)
+}
+n_brain_area.Data %>%
+    kbl(digits=2, col.names = c("Mice", "First Number of Brain Areas", "Last Number of Brain Areas", "Mean Number of Brain Areas")) %>%
+    kable_classic(full_width=F, html_font="Cambria")
+
+
+#Table for the first, last, and mean number of neurons
+n_neurons.Data <- tibble(
+  mouse_name = rep(0,4),
+  min = rep(0,4),
+  max = rep(0,4),
+  mean = rep(0,4),
+)
+
+
+for(i in range(4)){
+  n_neurons.Data$mouse_name = c("Cori", "Forssmann", "Hench", "Lederberg")
+  n_neurons.Data$min = c(cor.n_neurons.first, for.n_neurons.first, hen.n_neurons.first, led.n_neurons.first)
+  n_neurons.Data$max = c(cor.n_neurons.last, for.n_neurons.last, hen.n_neurons.last, led.n_neurons.last)
+  n_neurons.Data$mean = c(cor.n_neurons.mean, for.n_neurons.mean, hen.n_neurons.mean, led.n_neurons.mean)
+}
+n_neurons.Data %>%
+    kbl(digits=2, col.names = c("Mice", "First Number of Neurons", "Last Number of Neurons", "Mean Number of Neurons")) %>%
+    kable_classic(full_width=F, html_font="Cambria")
+
+
+
+cor.exps = alter_Date(contrasts, "Cori", length); cor.exps
+for.exps = alter_Date(contrasts, "Forssmann", length); for.exps
+hen.exps = alter_Date(contrasts, "Hench", length); hen.exps
+led.exps = alter_Date(contrasts, "Lederberg", length); led.exps
+
+#Find the number of trials for each mouse
+cor.trials = alter_nTrials(contrasts, "Cori", sum); cor.trials
+for.trials = alter_nTrials(contrasts, "Forssmann", sum); for.trials
+hen.trials = alter_nTrials(contrasts, "Hench", sum); hen.trials
+led.trials = alter_nTrials(contrasts, "Lederberg", sum); led.trials
+
+
+#####Ongoing
+generalSummary.Data <- tibble(
+  mouse_name = rep(0,4),
+  n.sessions = rep(0,4),
+  n.trials = rep(0,4),
+  success_rate.min = rep(0,4),
+  success_rate.max = rep(0,4),
+  success_rate.mean = rep(0,4),
+  n_brain_area.min = rep(0,4),
+  n_brain_area.max = rep(0,4),
+  n_brain_area.mean = rep(0,4),
+  n_neurons.min = rep(0,4),
+  n_neurons.max = rep(0,4),
+  n_neurons.mean = rep(0,4),
+)
+
+for(i in range(4)){
+  generalSummary.Data$mouse_name = c("Cori", "Forssmann", "Hench", "Lederberg")
+  generalSummary.Data$n.sessions = c(cor.exps, for.exps, hen.exps, led.exps)
+  generalSummary.Data$n.trials = c(cor.trials, for.trials, hen.trials, led.trials)
+  generalSummary.Data$min = c(cor.success_rate.first, for.success_rate.first, hen.success_rate.first, led.success_rate.first)
+  generalSummary.Data$max = c(cor.success_rate.last, for.success_rate.last, hen.success_rate.last, led.success_rate.last)
+  generalSummary.Data$mean = c(cor.success_rate.mean, for.success_rate.mean, hen.success_rate.mean, led.success_rate.mean)
+  generalSummary.Data$min = c(cor.n_brain_area.first, for.n_brain_area.first, hen.n_brain_area.first, led.n_brain_area.first)
+  generalSummary.Data$max = c(cor.n_brain_area.last, for.n_brain_area.last, hen.n_brain_area.last, led.n_brain_area.last)
+  generalSummary.Data$mean = c(cor.n_brain_area.mean, for.n_brain_area.mean, hen.n_brain_area.mean, led.n_brain_area.mean)
+  generalSummary.Data$min = c(cor.n_neurons.first, for.n_neurons.first, hen.n_neurons.first, led.n_neurons.first)
+  generalSummary.Data$max = c(cor.n_neurons.last, for.n_neurons.last, hen.n_neurons.last, led.n_neurons.last)
+  generalSummary.Data$mean = c(cor.n_neurons.mean, for.n_neurons.mean, hen.n_neurons.mean, led.n_neurons.mean)
+}
+
+
+
+# generalSummary.Data %>%
+#     kbl(col.names = c("Mice", "Number of Session", "Number of Trials", "First Success Rate", "Last Success Rate", "Mean Success Rate", "First Number of Brain Areas", "Last Number of Brain Areas", "Mean Number of Brain Areas", "First Number of Neurons", "Last Number of Neurons", "Mean Number of Neurons")) %>%
+#     kable_classic(full_width=F, html_font="Cambria")
+# 
+
+
+```
+
+
+As demonstrated in the tables above, there are significant differences between the starting, ending, and mean values for each mouse throughout this study. 
+In the tables above, we studied the starting, ending, and mean values for the success rate ('success_rate'), the number of brain areas ('n_brain_area'), and the number of involved neurons ('n_neurons'). 
+
+
+First, we examine the success rates. 
+Not all of the success rates see a significant increase in the study--while the other three mice have an ending success rate that is larger than their first success rate, Forssmann has the same starting and ending success rate. Given that this mouse underwent the same experiment multiple times and failed to improve along with its peers, we can guess that the mouse's individual qualities had something to do with this abnormality.
+Lederberg had the highest mean success rate--This can be attributed to individual qualities or (very likely) how Lederberg underwent more sessions and more trials than any other mouse in the study.
+
+Then, we examine the number of brain areas.
+
+
+
+
+
+
+
+To better understand our data (and the structures of our sessions), we can select a session and plot its spikes per area.
+Based upon the spikes per brain area, we can identify the brain areas we believe to be most active, characterized by the largest spikes.
+
+
+```{r}
+average_spike_area<-function(i.t,this_session){
+  spk.trial = this_session$spks[[i.t]]
+  area= this_session$brain_area
+  spk.count=apply(spk.trial,1,sum)
+  spk.average.tapply=tapply(spk.count, area, mean)
+  return(spk.average.tapply)
+  }
+
+# Test the function
+
+i.s=17
+i.t=1
+
+average_spike_area(1,this_session = session[[i.s]])
+```
+
+
+
+
+```{r}
+n.trial=length(session[[i.s]]$feedback_type)
+n.area=length(unique(session[[i.s]]$brain_area ))
+# Alternatively, you can extract these information in the meta that we created before.
+
+# We will create a data frame that contain the average spike counts for each area, feedback type,  the two contrasts, and the trial id
+
+trial.summary =matrix(nrow=n.trial,ncol= n.area+1+2+1)
+for(i.t in 1:n.trial){
+  trial.summary[i.t,]=c(average_spike_area(i.t,this_session = session[[i.s]]),
+                          session[[i.s]]$feedback_type[i.t],
+                        session[[i.s]]$contrast_left[i.t],
+                        session[[i.s]]$contrast_right[i.s],
+                        i.t)
+}
+
+colnames(trial.summary)=c(names(average_spike_area(i.t,this_session = session[[i.s]])), 'feedback', 'left contr.','right contr.','id' )
+
+# Turning it into a data frame
+trial.summary <- as_tibble(trial.summary)
+```
+
+
+Now, we plot our spike data.
+
+```{r}
+area.col=rainbow(n=n.area,alpha=0.7)
+# In base R, I usually initiate a blank plot before drawing anything on it
+plot(x=1,y=0, col='white',xlim=c(0,n.trial),ylim=c(0.5,2.2), xlab="Trials",ylab="Average spike counts", main=paste("Spikes per area in Session", i.s))
+
+
+for(i in 1:n.area){
+  lines(y=trial.summary[[i]],x=trial.summary$id,col=area.col[i],lty=2,lwd=1)
+  lines(smooth.spline(trial.summary$id, trial.summary[[i]]),col=area.col[i],lwd=3)
+  }
+legend("topright", 
+  legend = colnames(trial.summary)[1:n.area], 
+  col = area.col, 
+  lty = 1, 
+  cex = 0.8
+)
+
+```
+
+Judging by the graph above, we can see that the average spike counts fluctuate considerably. The highest average spike counts appear to be associated with brain areas "LD" and "VPL". The biggest fluctuation appeared to come from the "RT" brain area, where the average spike count jumped up by about a unit, in the area between the 80th trial and the 100th trial.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
